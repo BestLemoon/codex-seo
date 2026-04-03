@@ -51,7 +51,7 @@ The JSON file looks like:
   "type": "service_account",
   "project_id": "your-project-id",
   "private_key_id": "...",
-  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+  "private_key": "<redacted key material>",
   "client_email": "codex-seo@your-project.iam.gserviceaccount.com",
   "client_id": "...",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -90,7 +90,7 @@ Save to `~/.config/codex-seo/google-api.json`:
 ```json
 {
   "service_account_path": "~/.config/codex-seo/service_account.json",
-  "api_key": "AIzaSy...",
+  "api_key": "...",
   "default_property": "sc-domain:example.com",
   "ga4_property_id": "properties/123456789"
 }

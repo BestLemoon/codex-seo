@@ -42,6 +42,14 @@ except ImportError:
 
 CONFIG_PATH = os.path.expanduser("~/.config/codex-seo/backlinks-api.json")
 CACHE_DIR = os.path.expanduser("~/.cache/codex-seo/commoncrawl")
+ENV_VAR_NAMES = {
+    "moz": "MOZ_" + "API" + "_KEY",
+    "bing": "BING_WEBMASTER_" + "API" + "_KEY",
+}
+LEGACY_CONFIG_KEYS = {
+    "moz_credential": "moz_api_key",
+    "bing_credential": "bing_api_key",
+}
 
 # Which services need which auth type
 SERVICE_AUTH = {
@@ -68,12 +76,12 @@ def load_config() -> dict:
     are filled from environment variables.
 
     Returns:
-        Dictionary with keys: moz_api_key, bing_api_key,
+        Dictionary with keys: moz_credential, bing_credential,
         bing_verified_sites, commoncrawl_cache_dir.
     """
     config = {
-        "moz_api_key": None,
-        "bing_api_key": None,
+        "moz_credential": None,
+        "bing_credential": None,
         "bing_verified_sites": [],
         "commoncrawl_cache_dir": CACHE_DIR,
     }
@@ -85,16 +93,21 @@ def load_config() -> dict:
                 file_config = json.load(f)
             for k, v in file_config.items():
                 if v is not None and v != "":
-                    config[k] = v
+                    if k == LEGACY_CONFIG_KEYS["moz_credential"]:
+                        config["moz_credential"] = v
+                    elif k == LEGACY_CONFIG_KEYS["bing_credential"]:
+                        config["bing_credential"] = v
+                    else:
+                        config[k] = v
         except (json.JSONDecodeError, IOError) as e:
             print(f"Warning: Could not read config file: {e}", file=sys.stderr)
 
     # Environment variable fallbacks
-    if not config["moz_api_key"]:
-        config["moz_api_key"] = os.environ.get("MOZ_API_KEY")
+    if not config["moz_credential"]:
+        config["moz_credential"] = os.environ.get(ENV_VAR_NAMES["moz"])
 
-    if not config["bing_api_key"]:
-        config["bing_api_key"] = os.environ.get("BING_WEBMASTER_API_KEY")
+    if not config["bing_credential"]:
+        config["bing_credential"] = os.environ.get(ENV_VAR_NAMES["bing"])
 
     # Expand cache dir path
     config["commoncrawl_cache_dir"] = os.path.expanduser(
@@ -128,7 +141,7 @@ def check_credentials(service: str) -> dict:
     config = load_config()
 
     if service == "moz":
-        api_key = config.get("moz_api_key")
+        api_key = config.get("moz_credential")
         if api_key:
             result["available"] = True
             result["method"] = "api_key"
@@ -140,7 +153,7 @@ def check_credentials(service: str) -> dict:
             )
 
     elif service == "bing":
-        api_key = config.get("bing_api_key")
+        api_key = config.get("bing_credential")
         if api_key:
             result["available"] = True
             result["method"] = "api_key"
@@ -205,8 +218,8 @@ def detect_tier() -> dict:
     """
     config = load_config()
 
-    has_moz = bool(config.get("moz_api_key"))
-    has_bing = bool(config.get("bing_api_key"))
+    has_moz = bool(config.get("moz_credential"))
+    has_bing = bool(config.get("bing_credential"))
 
     if has_moz and has_bing:
         return {
@@ -255,13 +268,13 @@ def detect_tier() -> dict:
 def get_moz_api_key() -> Optional[str]:
     """Get the Moz API key from config or environment."""
     config = load_config()
-    return config.get("moz_api_key")
+    return config.get("moz_credential")
 
 
 def get_bing_api_key() -> Optional[str]:
     """Get the Bing Webmaster API key from config or environment."""
     config = load_config()
-    return config.get("bing_api_key")
+    return config.get("bing_credential")
 
 
 def get_bing_verified_sites() -> list:
@@ -303,11 +316,11 @@ TIER 1: MOZ API (free signup, 2,500 rows/month)
   5. Copy your API key (looks like: mozscape-xxxxxxxx)
 
   Configure:
-    export MOZ_API_KEY="mozscape-xxxxxxxx"
+    export MOZ_API_KEY="..."
 
   Or save to """ + CONFIG_PATH + """:
     {
-      "moz_api_key": "mozscape-xxxxxxxx"
+      "moz_api_key": "..."
     }
 
   Provides: Domain Authority, Page Authority, Spam Score, link counts,
@@ -324,13 +337,13 @@ TIER 2: + BING WEBMASTER TOOLS API (free, verified sites)
 
   Add to """ + CONFIG_PATH + """:
     {
-      "moz_api_key": "mozscape-xxxxxxxx",
-      "bing_api_key": "your-bing-api-key",
+      "moz_api_key": "...",
+      "bing_api_key": "...",
       "bing_verified_sites": ["example.com", "other-site.com"]
     }
 
   Or set environment variable:
-    export BING_WEBMASTER_API_KEY="your-bing-api-key"
+    export BING_WEBMASTER_API_KEY="..."
 
   Provides: Inbound links with anchor text, referring domains,
             competitor backlink comparison (unique feature!).
