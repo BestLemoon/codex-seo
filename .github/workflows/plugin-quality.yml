@@ -22,7 +22,7 @@ jobs:
           python-version: "3.12"
 
       - name: Codex plugin quality gate
-        uses: hashgraph-online/hol-codex-plugin-scanner-action@b45d6b583afe05819b24edc8e6418c9ad2e1f1d0
+        uses: hashgraph-online/hol-codex-plugin-scanner-action@b6bf49f0e54e5ec7966b037f4ee381057e9db5de
         with:
           plugin_dir: "."
           fail_on_severity: high
