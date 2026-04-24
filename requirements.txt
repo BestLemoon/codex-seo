@@ -13,7 +13,7 @@ validators>=0.22.0,<1.0.0         # No known CVEs
 # Report generation (for seo-google PDF/Excel reports)
 matplotlib>=3.8.0,<4.0.0              # No known CVEs
 weasyprint>=61.0,<70.0                # No known CVEs
-openpyxl>=3.1.0,<4.0.0                # No known CVEs (Excel export)
+openpyxl>=3.1.5,<4.0.0                # No known CVEs (Excel export)
 
 # Google API dependencies (for seo-google skill)
 google-api-python-client>=2.100.0,<3.0.0   # No known CVEs
